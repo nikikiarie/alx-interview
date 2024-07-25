@@ -8,6 +8,8 @@ def pascal_triangle(n):
     Returns a list of lists of integers
     representing the Pascal tri of n
     """
+
+
     tri = []
     if n <= 0:
         return tri
