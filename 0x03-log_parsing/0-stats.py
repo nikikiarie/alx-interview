@@ -1,43 +1,69 @@
 #!/usr/bin/python3
 import sys
 import signal
+import re
 
-size = 0
-count = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
-lines = 0
+# Global variables to keep track of file sizes and status codes
+total_size = 0  # Total accumulated file size
+status_counts = {}  # Dictionary to count occurrences of each status code
+line_counter = 0  # Counter to track the number of lines processed
 
-def show():
-    print(f"File size: {size}")
-    for code in sorted(count.keys()):
-        if count[code] > 0:
-            print(f"{code}: {count[code]}")
+def show_stats():
+    """Print the statistics about file sizes and status codes."""
+    global total_size, status_counts
+    
+    # Print the total accumulated file size
+    print(f"File size: {total_size}")
+    
+    # Print the count of each status code in ascending order
+    for code in sorted(status_counts.keys()):
+        print(f"{code}: {status_counts[code]}")
+    
+    # Reset the totals for the next batch
+    total_size = 0
+    status_counts.clear()
 
-def stop(sig, frm):
-    show()
+def handle_interrupt(signal, frame):
+    """Handle the keyboard interruption signal (CTRL + C)."""
+    show_stats()
     sys.exit(0)
 
-signal.signal(signal.SIGINT, stop)
+def main():
+    global line_counter, total_size
+    
+    # Register the function to handle keyboard interrupts (CTRL + C)
+    signal.signal(signal.SIGINT, handle_interrupt)
+    
+    # Regular expression pattern to match the log line format
+    log_pattern = re.compile(
+        r'^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) - \[(.*?)\] "GET /projects/260 HTTP/1.1" (\d{3}) (\d+)$'
+    )
+    
+    try:
+        for line in sys.stdin:
+            line_counter += 1
+            match = log_pattern.match(line.strip())
+            
+            if match:
+                status_code = match.group(3)  # Extract the status code
+                file_size = int(match.group(4))  # Extract and convert the file size
+                
+                # Update the total file size
+                total_size += file_size
+                
+                # Update the count for the status code
+                if status_code in ['200', '301', '400', '401', '403', '404', '405', '500']:
+                    if status_code not in status_counts:
+                        status_counts[status_code] = 0
+                    status_counts[status_code] += 1
+            
+            # Print statistics every 10 lines
+            if line_counter % 10 == 0:
+                show_stats()
 
-try:
-    for i in sys.stdin:
-        splits = i.split()
-        if len(splits) != 9:
-            continue
+    except BrokenPipeError:
+        # Handle broken pipe error if the generator script is interrupted
+        show_stats()
 
-        try:
-            code = int(splits[-2])
-            size_part = int(splits[-1])
-        except ValueError:
-            continue
-
-        if code in count:
-            count[code] += 1
-        size += size_part
-        lines += 1
-
-        if lines % 10 == 0:
-            show()
-
-except KeyboardInterrupt:
-    show()
-    sys.exit(0)
+if __name__ == "__main__":
+    main()
