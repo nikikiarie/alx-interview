@@ -1,68 +1,46 @@
 #!/usr/bin/python3
-"""
-Nqueens problem
-"""
+""" Nqueens """
 import sys
 
 
-def backtrack(e, ag, columns, positive, negative, cord):
+if len(sys.argv) > 2 or len(sys.argv) < 2:
+    print("Usage: nqueens N")
+    exit(1)
+
+if not sys.argv[1].isdigit():
+    print("N must be y number")
+    exit(1)
+
+if int(sys.argv[1]) < 4:
+    print("N must be at least 4")
+    exit(1)
+
+num = int(sys.argv[1])
+
+
+def queens(num, z=0, y=[], v=[], c=[]):
+    """ find likely positions """
+    if z < num:
+        for x in range(num):
+            if x not in y and z + x not in v and z - x not in c:
+                yield from queens(num, z + 1, y + [x], v + [z + x], c + [z - x])
+    else:
+        yield y
+
+
+def find(num):
     """
-    function to get solution
+    find
     """
-    if e == ag:
-        arr = []
-        for a in range(len(cord)):
-            for b in range(len(cord[a])):
-                if cord[a][b] == 1:
-                    arr.append([a, b])
-        print(arr)
-        return
-
-    for j in range(ag):
-        if j in columns or (e + j) in positive or (e - j) in negative:
-            continue
-
-        columns.add(j)
-        positive.add(e + j)
-        negative.add(e - j)
-        cord[e][j] = 1
-
-        backtrack(e+1, ag, columns, positive, negative, cord)
-
-        columns.remove(j)
-        positive.remove(e + j)
-        negative.remove(e - j)
-        cord[e][j] = 0
+    e = []
+    z = 0
+    for m in queens(num, 0):
+        for g in m:
+            e.append([z, g])
+            z += 1
+        print(e)
+        e = []
+        z = 0
 
 
-def nqueens(ag):
-    """
-    Nqueens problem
-    Args:
-        ag (int): queens number
-    Return:
-        List each queen for all
-        possible solutions
-    """
-    columns = set()
-    pos_diag = set()
-    neg_diag = set()
-    cord = [[0] * ag for i in range(ag)]
-
-    backtrack(0, ag, columns, pos_diag, neg_diag, cord)
-
-
-if __name__ == "__main__":
-    ag = sys.argv
-    if len(ag) != 2:
-        print("Usage: nqueens N")
-        sys.exit(1)
-    try:
-        o = int(ag[1])
-        if o < 4:
-            print("N must be at least 4")
-            sys.exit(1)
-        nqueens(o)
-    except ValueError:
-        print("N must be a number")
-        sys.exit(1)
+find(num)
