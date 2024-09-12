@@ -4,29 +4,29 @@
 
 def rotate_2d_matrix(matrix):
     """Rotates an n x n 2D matrix """
-    n = len(matrix)
+    a = len(matrix)
 
-    for i in range(n):
-        for j in range(i, n):
-            matrix[i][j], matrix[j][i] = matrix[j][i], matrix[i][j]
+    for x in range(a):
+        for z in range(x, a):
+            matrix[x][z], matrix[z][x] = matrix[z][x], matrix[x][z]
 
-    for row in matrix:
-        row.reverse()
+    for r in matrix:
+        r.reverse()
 
 
 def print_matrix(matrix):
     """print function for 2D matrix."""
-    for row in matrix:
-        print(row)
+    for r in matrix:
+        print(r)
     print()
 
 
-def build_matrix(n):
+def build_matrix(a):
     """Create an n x n matrix"""
     matrix = []
-    count = 1
-    for _ in range(n):
-        row = [count + i for i in range(n)]
-        matrix.append(row)
-        count += n
+    cnt = 1
+    for _ in range(a):
+        r = [cnt + x for x in range(a)]
+        matrix.append(r)
+        cnt += a
     return matrix
