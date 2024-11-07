@@ -1,5 +1,7 @@
 #!/usr/bin/python3
-"""Checks if a collection of boxes can be unlocked with keys found inside them."""
+"""Checks if a collection of boxes can be unlocked with keys
+    found inside them."""
+
 
 def canUnlockAll(containers):
     """Determines if all containers can be opened"""
